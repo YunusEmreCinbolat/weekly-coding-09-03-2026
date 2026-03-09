@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  gateway:
+    image: nginx:1.27-alpine
+    container_name: weekly-gateway
+    ports:
+      - "8080:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - user-service
+      - product-service
+      - order-service
+
+  user-service:
+    build: ./user-service
+    container_name: weekly-user-service
+    ports:
+      - "3001:3000"
+    environment:
+      - SERVICE_NAME=user-service
+
+  product-service:
+    build: ./product-service
+    container_name: weekly-product-service
+    ports:
+      - "3002:3000"
+    environment:
+      - SERVICE_NAME=product-service
+      - DB_HOST=localhost
+
+  order-service:
+    build: ./order-service
+    container_name: weekly-order-service
+    ports:
+      - "3003:3000"
+    environment:
+      - SERVICE_NAME=order-service
+      - PRODUCT_SERVICE_URL=http://product-service:5000
